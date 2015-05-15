@@ -745,6 +745,11 @@ public abstract class AbstractEntityTuplizer implements EntityTuplizer {
 		return false;
 	}
 
+	public boolean hasUninitializedLazyProperties(Object entity, Object[] state) {
+		// the default is to simply not lazy fetch properties for now...
+		return false;
+	}
+
 	public final boolean isInstance(Object object) {
         return getInstantiator().isInstance( object );
 	}

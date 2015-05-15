@@ -39,6 +39,7 @@ import org.hibernate.MappingException;
 import org.hibernate.PropertyNotFoundException;
 import org.hibernate.bytecode.instrumentation.internal.FieldInterceptionHelper;
 import org.hibernate.bytecode.instrumentation.spi.FieldInterceptor;
+import org.hibernate.bytecode.instrumentation.spi.LazyPropertyInitializer;
 import org.hibernate.bytecode.spi.ReflectionOptimizer;
 import org.hibernate.cfg.Environment;
 import org.hibernate.classic.Lifecycle;
@@ -74,7 +75,7 @@ public class PojoEntityTuplizer extends AbstractEntityTuplizer {
 	private final Class mappedClass;
 	private final Class proxyInterface;
 	private final boolean lifecycleImplementor;
-	private final Set lazyPropertyNames = new HashSet();
+	private final Set<String> lazyPropertyNames = new HashSet<String>();
 	private final ReflectionOptimizer optimizer;
 	private final boolean isInstrumented;
 
@@ -535,6 +536,27 @@ public class PojoEntityTuplizer extends AbstractEntityTuplizer {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
+	public boolean hasUninitializedLazyProperties(Object entity, Object[] state) {
+		if (getEntityMetamodel().hasLazyProperties()) {
+			FieldInterceptor callback = FieldInterceptionHelper.extractFieldInterceptor(entity);
+			if (callback == null) {
+				//We need to check the state array and see if it has any un-fetched properties.
+				for (String propertyName : lazyPropertyNames) {
+					int index = getEntityMetamodel().getPropertyIndex(propertyName);
+					if (state[index] == LazyPropertyInitializer.UNFETCHED_PROPERTY) {
+						return true;
+					}
+				}
+			}
+			else {
+				return !callback.isInitialized();
+			}
+		}
+		return false;
+	}
+
+	@Override
 	public boolean isInstrumented() {
 		return isInstrumented;
 	}
