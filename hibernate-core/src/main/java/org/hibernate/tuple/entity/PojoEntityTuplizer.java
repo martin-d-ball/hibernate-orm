@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.hibernate.bytecode.instrumentation.spi.LazyPropertyInitializer;
 import org.jboss.logging.Logger;
 
 import org.hibernate.EntityMode;
@@ -74,7 +75,7 @@ public class PojoEntityTuplizer extends AbstractEntityTuplizer {
 	private final Class mappedClass;
 	private final Class proxyInterface;
 	private final boolean lifecycleImplementor;
-	private final Set lazyPropertyNames = new HashSet();
+	private final Set<String> lazyPropertyNames = new HashSet<String>();
 	private final ReflectionOptimizer optimizer;
 	private final boolean isInstrumented;
 
@@ -530,6 +531,28 @@ public class PojoEntityTuplizer extends AbstractEntityTuplizer {
 		else {
 			return false;
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean hasUninitializedLazyProperties(Object entity, Object[] state) {
+		if (getEntityMetamodel().hasLazyProperties()) {
+			FieldInterceptor callback = FieldInterceptionHelper.extractFieldInterceptor(entity);
+			if (callback == null) {
+				//We need to check the state array and see if it has any un-fetched properties.
+				for (String propertyName : lazyPropertyNames) {
+					int index = getEntityMetamodel().getPropertyIndex(propertyName);
+					if (state[index] == LazyPropertyInitializer.UNFETCHED_PROPERTY) {
+						return true;
+					}
+				}
+			} else {
+				return !callback.isInitialized();
+			}
+		}
+		return false;
 	}
 
 	/**
