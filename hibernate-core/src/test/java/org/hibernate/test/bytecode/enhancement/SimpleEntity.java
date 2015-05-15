@@ -23,10 +23,7 @@
  */
 package org.hibernate.test.bytecode.enhancement;
 
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.List;
 import java.util.Set;
 
@@ -38,6 +35,7 @@ public class SimpleEntity {
 	private Long id;
 	private String name;
 	private boolean active;
+	@Basic(fetch = FetchType.LAZY)
 	private long someNumber;
     private List<String> someStrings;
 

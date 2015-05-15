@@ -754,6 +754,13 @@ public interface EntityPersister extends OptimisticCacheSource, EntityDefinition
 	public boolean hasUninitializedLazyProperties(Object object);
 
 	/**
+	 * Does the given instance or related state have any uninitialized lazy properties.
+	 * @param entity The entity to attempt to check.
+	 * @param state If the entity does not have a FieldInterceptor set then we need to check the state instead.
+	 * @return true if there are any uninitialised lazy fields.
+	 */
+	public boolean hasUninitializedLazyProperties(Object entity, Object[] state);
+	/**
 	 * Set the identifier and version of the given instance back to its "unsaved" value.
 	 *
 	 * @param entity The entity instance

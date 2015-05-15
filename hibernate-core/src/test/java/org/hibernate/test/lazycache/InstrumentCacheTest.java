@@ -110,13 +110,14 @@ public class InstrumentCacheTest extends BaseCoreFunctionalTestCase {
 
 		s = sessionFactory().openSession();
 		tx = s.beginTransaction();
-		s.persist( new Document("HiA", "Hibernate book", "Hibernate is....") );
+		Document doc = new Document("HiA", "Hibernate book", "Hibernate is....");
+		s.persist( doc );
 		tx.commit();
 		s.close();
 
 		s = sessionFactory().openSession();
 		tx = s.beginTransaction();
-		s.createQuery("from Document fetch all properties").uniqueResult();
+		s.createQuery("from Document d fetch all properties where d.id = " + doc.getId()).uniqueResult();
 		tx.commit();
 		s.close();
 

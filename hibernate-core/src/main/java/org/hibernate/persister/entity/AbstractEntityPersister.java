@@ -4363,6 +4363,11 @@ public abstract class AbstractEntityPersister
 	}
 
 	@Override
+	public boolean hasUninitializedLazyProperties(Object object, Object[] state) {
+		return getEntityTuplizer().hasUninitializedLazyProperties( object, state );
+	}
+
+	@Override
 	public void resetIdentifier(Object entity, Serializable currentId, Object currentVersion, SessionImplementor session) {
 		getEntityTuplizer().resetIdentifier( entity, currentId, currentVersion, session );
 	}
@@ -4837,7 +4842,7 @@ public abstract class AbstractEntityPersister
 			return new StandardCacheEntryImpl(
 					state,
 					persister,
-					persister.hasUninitializedLazyProperties( entity ),
+					persister.hasUninitializedLazyProperties( entity, state ),
 					version,
 					session,
 					entity
@@ -4882,7 +4887,7 @@ public abstract class AbstractEntityPersister
 			return new StandardCacheEntryImpl(
 					state,
 					persister,
-					persister.hasUninitializedLazyProperties( entity ),
+					persister.hasUninitializedLazyProperties( entity, state ),
 					version,
 					session,
 					entity

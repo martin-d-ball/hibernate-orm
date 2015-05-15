@@ -162,5 +162,18 @@ task jaxb {
 
 }
 
+task instrument(dependsOn: compileTestJava) << {
+    ant.taskdef(name: 'hibInstrument',
+            classname: 'org.hibernate.tool.instrument.javassist.InstrumentTask',
+            classpath: configurations.testCompile.asPath)
+    ant.hibInstrument(verbose: 'true'){
+        fileset(dir:"$buildDir/classes/test/org/hibernate/test/lazycache"){
+            include(name: "LazyDateEntity.class")
+        }
+    }
+    println("hibernate instrumentation")
+}
+test.dependsOn instrument
+
 sourceSets.main.sourceGeneratorsTask.dependsOn jaxb
 sourceSets.main.sourceGeneratorsTask.dependsOn generateGrammarSource
