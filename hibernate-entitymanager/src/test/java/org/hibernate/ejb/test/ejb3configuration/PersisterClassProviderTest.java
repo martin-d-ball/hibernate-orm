@@ -593,6 +593,11 @@ public class PersisterClassProviderTest {
 		}
 
 		@Override
+		public boolean hasUninitializedLazyProperties(Object entity, Object[] entityState) {
+			return false;
+		}
+
+		@Override
 		public void resetIdentifier(Object entity, Serializable currentId, Object currentVersion, SessionImplementor session) {
 		}
 
