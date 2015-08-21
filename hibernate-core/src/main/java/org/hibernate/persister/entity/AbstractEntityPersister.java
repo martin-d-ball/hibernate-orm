@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.hibernate.bytecode.instrumentation.internal.FieldInterceptionHelper;
 import org.jboss.logging.Logger;
 
 import org.hibernate.AssertionFailure;
@@ -5003,7 +5004,36 @@ public abstract class AbstractEntityPersister
 		public CacheEntry buildCacheEntry(Object entity, Object[] state, Object version, SessionImplementor session);
 	}
 
-	private static class StandardCacheEntryHelper implements CacheEntryHelper {
+	private static abstract class AbstractCacheEntryHelper implements CacheEntryHelper {
+		/**
+		 * Does the given instance or related state have any uninitialized lazy properties.
+		 * @param persister The entity persister from with we can read the meta modal and determine if the entity has
+		 *                  lazy properties.
+		 * @param entity The entity to be check for uninitialized lazy properties.
+		 * @param entityState The entity state array, which we check for lazy properties if the entity has not yet had the
+		 *                    FieldInterceptor injected.
+		 * @return True if uninitialized lazy properties were found; false otherwise.
+		 */
+		protected boolean hasUninitializedLazyProperties(EntityPersister persister, Object entity, Object[] entityState) {
+			if (persister.getEntityMetamodel().hasLazyProperties()) {
+				FieldInterceptor callback = FieldInterceptionHelper.extractFieldInterceptor(entity);
+				if (callback == null) {
+					//We need to check the state array and see if it has any un-fetched properties.
+					for (Object property : entityState) {
+						if (property == LazyPropertyInitializer.UNFETCHED_PROPERTY) {
+							return true;
+						}
+					}
+				}
+				else {
+					return !callback.isInitialized();
+				}
+			}
+			return false;
+		}
+	}
+
+	private static class StandardCacheEntryHelper extends AbstractCacheEntryHelper {
 		private final EntityPersister persister;
 
 		private StandardCacheEntryHelper(EntityPersister persister) {
@@ -5020,7 +5050,6 @@ public abstract class AbstractEntityPersister
 			return new StandardCacheEntryImpl(
 					state,
 					persister,
-					persister.hasUninitializedLazyProperties( entity ),
 					version,
 					session,
 					entity
@@ -5046,7 +5075,7 @@ public abstract class AbstractEntityPersister
 		}
 	}
 
-	private static class StructuredCacheEntryHelper implements CacheEntryHelper {
+	private static class StructuredCacheEntryHelper extends AbstractCacheEntryHelper {
 		private final EntityPersister persister;
 		private final StructuredCacheEntry structure;
 
@@ -5065,7 +5094,6 @@ public abstract class AbstractEntityPersister
 			return new StandardCacheEntryImpl(
 					state,
 					persister,
-					persister.hasUninitializedLazyProperties( entity ),
 					version,
 					session,
 					entity
