@@ -190,7 +190,8 @@ public class JndiServiceImpl implements JndiService {
 		InitialContext initialContext = buildInitialContext();
 		Name name = parseName( jndiName, initialContext );
 		try {
-			( (EventContext) initialContext ).addNamingListener( name, EventContext.OBJECT_SCOPE, listener );
+			String contextName = name.get(0);
+			((EventContext) initialContext.lookup(contextName)).addNamingListener(name, EventContext.OBJECT_SCOPE, listener);
 		}
 		catch (Exception e) {
 			throw new JndiException( "Unable to bind listener to namespace [" + name + "]", e );
