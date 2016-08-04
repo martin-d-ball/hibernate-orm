@@ -5184,7 +5184,6 @@ public abstract class AbstractEntityPersister
 			return new StandardCacheEntryImpl(
 					state,
 					persister,
-					persister.hasUninitializedLazyProperties( entity ),
 					version,
 					session,
 					entity
@@ -5229,7 +5228,6 @@ public abstract class AbstractEntityPersister
 			return new StandardCacheEntryImpl(
 					state,
 					persister,
-					persister.hasUninitializedLazyProperties( entity ),
 					version,
 					session,
 					entity

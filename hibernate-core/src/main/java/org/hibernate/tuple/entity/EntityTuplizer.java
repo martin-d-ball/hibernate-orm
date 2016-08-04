@@ -236,7 +236,7 @@ public interface EntityTuplizer extends Tuplizer {
      * @return True if uninitialized lazy properties were found; false otherwise.
      */
 	boolean hasUninitializedLazyProperties(Object entity);
-	
+
 	/**
 	 * Is it an instrumented POJO?
 	 *

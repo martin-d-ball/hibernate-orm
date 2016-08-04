@@ -594,7 +594,6 @@ public class CustomPersister implements EntityPersister {
 		return new StandardCacheEntryImpl(
 				state,
 				this,
-				this.hasUninitializedLazyProperties( entity ),
 				version,
 				session,
 				entity
